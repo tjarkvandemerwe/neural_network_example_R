@@ -1,4 +1,8 @@
 
+- <a href="#setup" id="toc-setup">Setup</a>
+- <a href="#forward-propagation" id="toc-forward-propagation">Forward
+  propagation</a>
+
 # Setup
 
 ### Goal
@@ -70,11 +74,11 @@ nn
 
     ## $w_input
     ##      [,1] [,2]
-    ## [1,] 0.67  0.1
+    ## [1,] 0.48  0.3
     ## 
     ## $w_output
     ##      [,1]
-    ## [1,] 0.92
-    ## [2,] 0.29
+    ## [1,] 0.44
+    ## [2,] 0.97
 
 # Forward propagation
