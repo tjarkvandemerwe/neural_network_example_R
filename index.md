@@ -1,33 +1,80 @@
-Neural Network Example in R
-================
 
-## GitHub Documents
+# Setup
 
-This is an R Markdown format used for publishing markdown documents to
-GitHub. When you click the **Knit** button all R code chunks are run and
-a markdown file (.md) suitable for publishing to GitHub is generated.
+### Goal
 
-## Including Code
+The goal is to create a working example of a basic deep neural network
+in R. This example uses the tidyverse style of R. The main goal is
+clarity and explaining the concept, not speed or practical application.
 
-You can include R code in the document as follows:
+### Packages
 
 ``` r
-summary(cars)
+library(tidyverse)
 ```
 
-    ##      speed           dist       
-    ##  Min.   : 4.0   Min.   :  2.00  
-    ##  1st Qu.:12.0   1st Qu.: 26.00  
-    ##  Median :15.0   Median : 36.00  
-    ##  Mean   :15.4   Mean   : 42.98  
-    ##  3rd Qu.:19.0   3rd Qu.: 56.00  
-    ##  Max.   :25.0   Max.   :120.00
+### Training data
 
-## Including Plots
+The training data used in this example is fake data. And this example
+starts of with an output that is lineairly related to an input variable.
 
-You can also embed plots, for example:
+``` r
+data <- tibble(
+  input_value = c(0:10) / 10,
+  output_value = c(0:10) / -5 + 1
+)
 
-![](neural_network_example_files/figure-gfm/pressure-1.png)<!-- -->
+data |> head(7)
+```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to
-prevent printing of the R code that generated the plot.
+    ## # A tibble: 7 × 2
+    ##   input_value output_value
+    ##         <dbl>        <dbl>
+    ## 1         0            1  
+    ## 2         0.1          0.8
+    ## 3         0.2          0.6
+    ## 4         0.3          0.4
+    ## 5         0.4          0.2
+    ## 6         0.5          0  
+    ## 7         0.6         -0.2
+
+### Setup neural network
+
+``` r
+input_neurons  <- 1
+output_neurons <- 1
+layers         <- 1
+layer_neurons  <- 2
+
+
+nn <- list(
+  w_input = matrix(sample(0:100 / 100, layer_neurons * input_neurons), nrow = 1)
+)
+
+if(layers > 1){
+  for(n in 1:(layers - 1)){
+    a <- list(matrix(sample(0:100 / 100, layer_neurons * layer_neurons), nrow = layer_neurons))
+    names(a) <- paste0("w_hidden_layer_", n)
+    nn <- c(nn, a)
+  }
+}
+
+nn <- c(nn,
+        list(w_output = matrix(
+          sample(0:100 / 100, layer_neurons * output_neurons), ncol = 1
+        )))
+
+
+nn
+```
+
+    ## $w_input
+    ##      [,1] [,2]
+    ## [1,] 0.67  0.1
+    ## 
+    ## $w_output
+    ##      [,1]
+    ## [1,] 0.92
+    ## [2,] 0.29
+
+# Forward propagation

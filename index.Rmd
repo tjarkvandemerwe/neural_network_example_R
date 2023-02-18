@@ -1,5 +1,5 @@
 ---
-title: "Neural Network Example in R"
+# title: "Neural Network Example in R"
 output: github_document
 ---
 
@@ -7,24 +7,58 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## GitHub Documents
+# Setup
 
-This is an R Markdown format used for publishing markdown documents to GitHub. When you click the **Knit** button all R code chunks are run and a markdown file (.md) suitable for publishing to GitHub is generated.
+### Goal
+The goal is to create a working example of a basic deep neural network in R.
+This example uses the tidyverse style of R. The main goal is clarity and explaining the concept, not speed or practical application.
 
-## Including Code
-
-You can include R code in the document as follows:
-
-```{r cars}
-summary(cars)
+### Packages
+```{r library, message = FALSE, warning = FALSE}
+library(tidyverse)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+### Training data
+The training data used in this example is fake data. And this example starts of with an output that is lineairly related to an input variable.
+```{r fake_data, message = FALSE, warning = FALSE}
+data <- tibble(
+  input_value = c(0:10) / 10,
+  output_value = c(0:10) / -5 + 1
+)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+data |> head(7)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+### Setup neural network
+```{r nn_parameters, message = FALSE, warning = FALSE}
+input_neurons  <- 1
+output_neurons <- 1
+layers         <- 1
+layer_neurons  <- 2
+
+
+nn <- list(
+  w_input = matrix(sample(0:100 / 100, layer_neurons * input_neurons), nrow = 1)
+)
+
+if(layers > 1){
+  for(n in 1:(layers - 1)){
+    a <- list(matrix(sample(0:100 / 100, layer_neurons * layer_neurons), nrow = layer_neurons))
+    names(a) <- paste0("w_hidden_layer_", n)
+    nn <- c(nn, a)
+  }
+}
+
+nn <- c(nn,
+        list(w_output = matrix(
+          sample(0:100 / 100, layer_neurons * output_neurons), ncol = 1
+        )))
+
+
+nn
+```
+
+
+# Forward propagation
