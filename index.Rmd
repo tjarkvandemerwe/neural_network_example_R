@@ -44,50 +44,42 @@ layers         <- 2
 layer_neurons  <- 3
 ```
 
-First a matrix of all weights (w) from the input neurons to the first layer of hidden neurons is created. This is an input_neurons x layer_neurons matrix, where input_neurons is the amount of neurons in the input layer, and layer_neurons is the amount of neurons per hidden layer.
+Every layer, except for the input layer, has a weigth matrix and bias vector associated with it. These are also related to the computational steps when passing the signal forward. So the structure to store these parameters will look like this:
 
-```{r nn_input, message = FALSE, warning = FALSE}
-nn_input <- list(
-  w_input_hidden_layer_1 = matrix(sample(0:100 / 100, layer_neurons * input_neurons), nrow = input_neurons)
+```{r nn_datastructure, echo = FALSE}
+list(
+  first_step = list(
+    weigths = matrix(1, nrow = 2, ncol = 2),
+    biases = rep(1, 2)
+  ),
+  second_step = list(
+    weigths = matrix(1, nrow = 2, ncol = 2),
+    biases = rep(1, 2)
+  )
 )
-
-nn_input
 ```
 
-If there are multiple hidden layers, the weights between these layers are created, this is an layer_neurons x layer_neurons matrix. Each hidden layer also has a bias value for every neuron in the layer. This is a single row matrix (vector) of length layer_neurons.
-```{r nn_hidden_w, message = FALSE, warning = FALSE}
+First a matrix of all weights (w) from the input neurons to the first layer of hidden neurons is created. This is an input_neurons x layer_neurons matrix, where input_neurons is the amount of neurons in the input layer, and layer_neurons is the amount of neurons per hidden layer. And this is repeated until the last layer to the output neurons is innitialised.
 
-w_hidden_layers <- list()
-b_hidden_layers <- list()
+```{r nn_w_and_b, message = FALSE, warning = FALSE}
+neurons_per_layer <- c(input_neurons, rep(layer_neurons, layers), output_neurons)
 
-for(n in 1:layers){
-  
-  b_hidden <- list(matrix(sample(0:100 / 100, layer_neurons), nrow = 1))
-  names(b_hidden) <- paste("b_hidden_layer", n , sep = "_")
-  b_hidden_layers <- c(b_hidden_layers, b_hidden)
-  
-  if(n > 1){
-    w_hidden <- list(matrix(sample(0:100 / 100, layer_neurons * layer_neurons), nrow = layer_neurons))
-    names(w_hidden) <- paste("w_hidden_layer", n - 1, n, sep = "_")
-    w_hidden_layers <- c(w_hidden_layers, w_hidden)
-  }
+create_weights_and_biases <- function(neurons_from, neurons_to) {
+  list(
+    weights = matrix(runif(neurons_from * neurons_to, -1, 1), nrow = neurons_from),
+    biases = runif(neurons_to, -1, 1)
+  )
 }
 
-nn_hidden <- c(w_hidden_layers, b_hidden_layers)
-nn_hidden
+weights_and_biases <-
+  map2(neurons_per_layer[-length(neurons_per_layer)],
+       neurons_per_layer[-1],
+       create_weights_and_biases)
+
+weights_and_biases
+
 ```
 
-```{r nn_output, message = FALSE, warning = FALSE}
-nn_output <- list(
-  w_output_layer_n = matrix(sample(0:100 / 100, layer_neurons * output_neurons), nrow = output_neurons),
-  b_output_layer = matrix(sample(0:100 / 100, output_neurons), nrow = 1)
-  )
 
-nn_output
-```
-```{r nn_total, message = FALSE, warning = FALSE}
-nn <- c(nn_input, nn_hidden, nn_output)
-nn
-```
 
 # Forward propagation

@@ -53,112 +53,84 @@ layers         <- 2
 layer_neurons  <- 3
 ```
 
+Every layer, except for the input layer, has a weigth matrix and bias
+vector associated with it. These are also related to the computational
+steps when passing the signal forward. So the structure to store these
+parameters will look like this:
+
+    ## $first_step
+    ## $first_step$weigths
+    ##      [,1] [,2]
+    ## [1,]    1    1
+    ## [2,]    1    1
+    ## 
+    ## $first_step$biases
+    ## [1] 1 1
+    ## 
+    ## 
+    ## $second_step
+    ## $second_step$weigths
+    ##      [,1] [,2]
+    ## [1,]    1    1
+    ## [2,]    1    1
+    ## 
+    ## $second_step$biases
+    ## [1] 1 1
+
 First a matrix of all weights (w) from the input neurons to the first
 layer of hidden neurons is created. This is an input_neurons x
 layer_neurons matrix, where input_neurons is the amount of neurons in
 the input layer, and layer_neurons is the amount of neurons per hidden
-layer.
+layer. And this is repeated until the last layer to the output neurons
+is innitialised.
 
 ``` r
-nn_input <- list(
-  w_input_hidden_layer_1 = matrix(sample(0:100 / 100, layer_neurons * input_neurons), nrow = input_neurons)
-)
+neurons_per_layer <- c(input_neurons, rep(layer_neurons, layers), output_neurons)
 
-nn_input
-```
-
-    ## $w_input_hidden_layer_1
-    ##      [,1] [,2] [,3]
-    ## [1,] 0.89 1.00 0.55
-    ## [2,] 0.52 0.28 0.24
-
-If there are multiple hidden layers, the weights between these layers
-are created, this is an layer_neurons x layer_neurons matrix. Each
-hidden layer also has a bias value for every neuron in the layer. This
-is a single row matrix (vector) of length layer_neurons.
-
-``` r
-w_hidden_layers <- list()
-b_hidden_layers <- list()
-
-for(n in 1:layers){
-  
-  b_hidden <- list(matrix(sample(0:100 / 100, layer_neurons), nrow = 1))
-  names(b_hidden) <- paste("b_hidden_layer", n , sep = "_")
-  b_hidden_layers <- c(b_hidden_layers, b_hidden)
-  
-  if(n > 1){
-    w_hidden <- list(matrix(sample(0:100 / 100, layer_neurons * layer_neurons), nrow = layer_neurons))
-    names(w_hidden) <- paste("w_hidden_layer", n - 1, n, sep = "_")
-    w_hidden_layers <- c(w_hidden_layers, w_hidden)
-  }
+create_weights_and_biases <- function(neurons_from, neurons_to) {
+  list(
+    weights = matrix(runif(neurons_from * neurons_to, -1, 1), nrow = neurons_from),
+    biases = runif(neurons_to, -1, 1)
+  )
 }
 
-nn_hidden <- c(w_hidden_layers, b_hidden_layers)
-nn_hidden
+weights_and_biases <-
+  map2(neurons_per_layer[-length(neurons_per_layer)],
+       neurons_per_layer[-1],
+       create_weights_and_biases)
+
+weights_and_biases
 ```
 
-    ## $w_hidden_layer_1_2
-    ##      [,1] [,2] [,3]
-    ## [1,] 0.14 0.48 0.31
-    ## [2,] 0.95 0.45 0.84
-    ## [3,] 0.41 0.23 0.07
+    ## [[1]]
+    ## [[1]]$weights
+    ##            [,1]        [,2]       [,3]
+    ## [1,] -0.5447291 -0.05338535 -0.3846959
+    ## [2,] -0.8776336  0.77318856  0.4785767
     ## 
-    ## $b_hidden_layer_1
-    ##      [,1] [,2] [,3]
-    ## [1,] 0.42 0.07 0.05
+    ## [[1]]$biases
+    ## [1] 0.1557528 0.7701158 0.4271647
     ## 
-    ## $b_hidden_layer_2
-    ##      [,1] [,2] [,3]
-    ## [1,] 0.03 0.42 0.21
-
-``` r
-nn_output <- list(
-  w_output_layer_n = matrix(sample(0:100 / 100, layer_neurons * output_neurons), nrow = output_neurons),
-  b_output_layer = matrix(sample(0:100 / 100, output_neurons), nrow = 1)
-  )
-
-nn_output
-```
-
-    ## $w_output_layer_n
-    ##      [,1] [,2] [,3]
-    ## [1,]  0.5 0.13 0.51
     ## 
-    ## $b_output_layer
-    ##      [,1]
-    ## [1,] 0.18
-
-``` r
-nn <- c(nn_input, nn_hidden, nn_output)
-nn
-```
-
-    ## $w_input_hidden_layer_1
-    ##      [,1] [,2] [,3]
-    ## [1,] 0.89 1.00 0.55
-    ## [2,] 0.52 0.28 0.24
+    ## [[2]]
+    ## [[2]]$weights
+    ##            [,1]       [,2]       [,3]
+    ## [1,]  0.9059758  0.5886812 0.58645821
+    ## [2,] -0.3910393  0.6240854 0.07163238
+    ## [3,]  0.0614815 -0.4041383 0.42474352
     ## 
-    ## $w_hidden_layer_1_2
-    ##      [,1] [,2] [,3]
-    ## [1,] 0.14 0.48 0.31
-    ## [2,] 0.95 0.45 0.84
-    ## [3,] 0.41 0.23 0.07
+    ## [[2]]$biases
+    ## [1]  0.1348914  0.9244048 -0.9783119
     ## 
-    ## $b_hidden_layer_1
-    ##      [,1] [,2] [,3]
-    ## [1,] 0.42 0.07 0.05
     ## 
-    ## $b_hidden_layer_2
-    ##      [,1] [,2] [,3]
-    ## [1,] 0.03 0.42 0.21
+    ## [[3]]
+    ## [[3]]$weights
+    ##            [,1]
+    ## [1,] -0.5119770
+    ## [2,] -0.9987706
+    ## [3,] -0.8815305
     ## 
-    ## $w_output_layer_n
-    ##      [,1] [,2] [,3]
-    ## [1,]  0.5 0.13 0.51
-    ## 
-    ## $b_output_layer
-    ##      [,1]
-    ## [1,] 0.18
+    ## [[3]]$biases
+    ## [1] 0.3786865
 
 # Forward propagation
