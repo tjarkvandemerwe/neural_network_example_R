@@ -1,6 +1,7 @@
 
 - <a href="#setup" id="toc-setup">Setup</a>
-- <a href="#forward-propagation" id="toc-forward-propagation">Forward
+- <a href="#forward-pass" id="toc-forward-pass">Forward pass</a>
+- <a href="#back-propagation" id="toc-back-propagation">Back
   propagation</a>
 
 # Setup
@@ -91,10 +92,10 @@ create_weights_and_biases <- function(neurons_from, neurons_to) {
   list(
     weights = matrix(
       runif(neurons_from * neurons_to, -1, 1),
-      nrow = neurons_from,
+      nrow = neurons_to,
       dimnames = list(
-        paste0("from_", 1:neurons_from),
-        paste0("to_", 1:neurons_to)
+        paste0("to_", 1:neurons_to),
+        paste0("from_", 1:neurons_from)
       )
     ),
     biases = runif(neurons_to, -1, 1)
@@ -114,33 +115,112 @@ weights_and_biases
 
     ## $step_1
     ## $step_1$weights
-    ##               to_1       to_2       to_3
-    ## from_1  0.01526446 -0.1457231 0.66190010
-    ## from_2 -0.08460486 -0.5003968 0.02126486
+    ##            from_1     from_2
+    ## to_1  0.709380241  0.2175265
+    ## to_2 -0.009977894  0.8085342
+    ## to_3 -0.722198173 -0.4571307
     ## 
     ## $step_1$biases
-    ## [1]  0.9831834 -0.5801799  0.5784724
+    ## [1] -0.2760984  0.4944348 -0.2455274
     ## 
     ## 
     ## $step_2
     ## $step_2$weights
-    ##              to_1       to_2       to_3
-    ## from_1 -0.1133457 -0.8707159  0.9119872
-    ## from_2  0.8050565 -0.2220603 -0.4712405
-    ## from_3 -0.3201872  0.7425106 -0.2090557
+    ##          from_1      from_2     from_3
+    ## to_1  0.4240072 -0.56112708  0.7498339
+    ## to_2  0.8195974 -0.09180253 -0.1685863
+    ## to_3 -0.5462511  0.76670882 -0.3449100
     ## 
     ## $step_2$biases
-    ## [1] -0.08921057  0.35723003 -0.33216029
+    ## [1]  0.4533401  0.6423786 -0.2082427
     ## 
     ## 
     ## $step_3
     ## $step_3$weights
-    ##              to_1
-    ## from_1 -0.6074537
-    ## from_2 -0.4153567
-    ## from_3 -0.1390953
+    ##           from_1      from_2     from_3
+    ## to_1 -0.09265419 -0.03291666 -0.3298822
     ## 
     ## $step_3$biases
-    ## [1] -0.5970573
+    ## [1] 0.7473469
 
-# Forward propagation
+# Forward pass
+
+To pass the signal through the network we need to iterate over the
+layers in the network, following the steps: - Calculate weigthed sum of
+inputs to each neuron - Minus bias of neuron - Activation function
+
+To do this three functions are build.
+
+### Weighted sum activation
+
+This function computes the weighted sum of all activations leading to
+this layer.
+
+``` r
+weighted_activation <- function(input_activation, weights) {
+  weights %*% input_activation
+}
+
+# Example:
+weights_and_biases$step_1$weights
+```
+
+    ##            from_1     from_2
+    ## to_1  0.709380241  0.2175265
+    ## to_2 -0.009977894  0.8085342
+    ## to_3 -0.722198173 -0.4571307
+
+``` r
+weighted_activation(c(1, 0.5), weights_and_biases$step_1$weights)
+```
+
+    ##            [,1]
+    ## to_1  0.8181435
+    ## to_2  0.3942892
+    ## to_3 -0.9507635
+
+### Reduce activation with bias
+
+The bias is removed form the activation for each neuron in the layer.
+This acts as a sort of treshhold.
+
+``` r
+remove_bias <- function(basic_activations, biases) {
+  basic_activations - biases
+}
+
+# Example:
+c(1, 0.5) |>
+  weighted_activation(weights_and_biases$step_1$weights) |>
+  remove_bias(c(-1, 0, 1))
+```
+
+    ##            [,1]
+    ## to_1  1.8181435
+    ## to_2  0.3942892
+    ## to_3 -1.9507635
+
+### Apply activation function
+
+For each neuron the value after the bias is removed, is put into an
+activation function. This is the final value for the activation of this
+layer, and provides the input for the next layer.
+
+``` r
+sigmoid <- function(basic_activations) {
+  1 / (1 + exp(-basic_activations))
+}
+
+# Example:
+c(1, 0.5) |>
+  weighted_activation(weights_and_biases$step_1$weights) |>
+  remove_bias(c(-1, 0, 1)) |> 
+  sigmoid()
+```
+
+    ##           [,1]
+    ## to_1 0.8603432
+    ## to_2 0.5973148
+    ## to_3 0.1244701
+
+# Back propagation

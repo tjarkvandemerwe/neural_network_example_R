@@ -68,10 +68,10 @@ create_weights_and_biases <- function(neurons_from, neurons_to) {
   list(
     weights = matrix(
       runif(neurons_from * neurons_to, -1, 1),
-      nrow = neurons_from,
+      nrow = neurons_to,
       dimnames = list(
-        paste0("from_", 1:neurons_from),
-        paste0("to_", 1:neurons_to)
+        paste0("to_", 1:neurons_to),
+        paste0("from_", 1:neurons_from)
       )
     ),
     biases = runif(neurons_to, -1, 1)
@@ -92,4 +92,60 @@ weights_and_biases
 
 
 
-# Forward propagation
+# Forward pass
+
+To pass the signal through the network we need to iterate over the layers in the network, following the steps:
+- Calculate weigthed sum of inputs to each neuron
+- Minus bias of neuron
+- Activation function
+
+To do this three functions are build.
+
+### Weighted sum activation
+This function computes the weighted sum of all activations leading to this layer.
+
+```{r weighted_sum, message = FALSE, warning = FALSE}
+
+weighted_activation <- function(input_activation, weights) {
+  weights %*% input_activation
+}
+
+# Example:
+weights_and_biases$step_1$weights
+weighted_activation(c(1, 0.5), weights_and_biases$step_1$weights)
+
+```
+### Reduce activation with bias
+The bias is removed form the activation for each neuron in the layer. This acts as a sort of treshhold.
+
+```{r biases_correct, message = FALSE, warning = FALSE}
+
+remove_bias <- function(basic_activations, biases) {
+  basic_activations - biases
+}
+
+# Example:
+c(1, 0.5) |>
+  weighted_activation(weights_and_biases$step_1$weights) |>
+  remove_bias(c(-1, 0, 1))
+
+```
+### Apply activation function
+For each neuron the value after the bias is removed, is put into an activation function.
+This is the final value for the activation of this layer, and provides the input for the next layer.
+
+```{r sigmoid, message = FALSE, warning = FALSE}
+
+sigmoid <- function(basic_activations) {
+  1 / (1 + exp(-basic_activations))
+}
+
+# Example:
+c(1, 0.5) |>
+  weighted_activation(weights_and_biases$step_1$weights) |>
+  remove_bias(c(-1, 0, 1)) |> 
+  sigmoid()
+
+```
+
+# Back propagation
