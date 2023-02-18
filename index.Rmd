@@ -161,13 +161,14 @@ activate_layer <- function(input_activations, weights_and_biases) {
     sigmoid()
 }
 
-# Now we want to iteratively apply this function, carrying the activation forward, for example:
+# Now we want to iteratively apply this function, carrying the activation forward, 
+#   this can be done like this, however this doesn't scale with the network:
 c(1, 0.5) |>
   activate_layer(weights_and_biases$step_1) |>
   activate_layer(weights_and_biases$step_2) |>
   activate_layer(weights_and_biases$step_3)
 
-# this can be made more simple using the reduce function:
+# This can be made more simple and scaling using the reduce function:
 reduce(weights_and_biases, activate_layer, .init = c(0.5, 1))
 
 ```

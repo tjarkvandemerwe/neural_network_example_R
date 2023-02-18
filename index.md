@@ -115,33 +115,33 @@ weights_and_biases
 
     ## $step_1
     ## $step_1$weights
-    ##          from_1      from_2
-    ## to_1 -0.7450488  0.77860893
-    ## to_2 -0.6288119  0.36267641
-    ## to_3 -0.2374146 -0.02404979
+    ##          from_1     from_2
+    ## to_1 -0.9642369  0.5810507
+    ## to_2  0.2577594 -0.1608710
+    ## to_3 -0.2684745  0.4841622
     ## 
     ## $step_1$biases
-    ## [1] -0.4975058 -0.7415134  0.1947421
+    ## [1]  0.7987872  0.5436218 -0.7583378
     ## 
     ## 
     ## $step_2
     ## $step_2$weights
-    ##          from_1     from_2      from_3
-    ## to_1 -0.5221671 -0.7262660 -0.04995297
-    ## to_2  0.2115723 -0.8425512  0.79824138
-    ## to_3  0.7711147 -0.3571429  0.86359267
+    ##           from_1    from_2     from_3
+    ## to_1 -0.09429003 0.1775677  0.3072712
+    ## to_2  0.76046556 0.6467591  0.2628238
+    ## to_3 -0.01934656 0.3837619 -0.9702936
     ## 
     ## $step_2$biases
-    ## [1] -0.9454709 -0.9604212  0.9269366
+    ## [1]  0.7330690 -0.9313348 -0.8553156
     ## 
     ## 
     ## $step_3
     ## $step_3$weights
-    ##           from_1     from_2     from_3
-    ## to_1 -0.03718008 -0.6827294 -0.3574443
+    ##          from_1   from_2     from_3
+    ## to_1 -0.8607697 0.037006 -0.2985853
     ## 
     ## $step_3$biases
-    ## [1] -0.4743555
+    ## [1] -0.7003775
 
 # Forward pass
 
@@ -165,19 +165,19 @@ weighted_activation <- function(input_activation, weights) {
 weights_and_biases$step_1$weights
 ```
 
-    ##          from_1      from_2
-    ## to_1 -0.7450488  0.77860893
-    ## to_2 -0.6288119  0.36267641
-    ## to_3 -0.2374146 -0.02404979
+    ##          from_1     from_2
+    ## to_1 -0.9642369  0.5810507
+    ## to_2  0.2577594 -0.1608710
+    ## to_3 -0.2684745  0.4841622
 
 ``` r
 weighted_activation(c(1, 0.5), weights_and_biases$step_1$weights)
 ```
 
-    ##            [,1]
-    ## to_1 -0.3557443
-    ## to_2 -0.4474737
-    ## to_3 -0.2494395
+    ##             [,1]
+    ## to_1 -0.67371158
+    ## to_2  0.17732388
+    ## to_3 -0.02639337
 
 ### Reduce activation with bias
 
@@ -196,9 +196,9 @@ c(1, 0.5) |>
 ```
 
     ##            [,1]
-    ## to_1  0.6442557
-    ## to_2 -0.4474737
-    ## to_3 -1.2494395
+    ## to_1  0.3262884
+    ## to_2  0.1773239
+    ## to_3 -1.0263934
 
 ### Apply activation function
 
@@ -219,9 +219,9 @@ c(1, 0.5) |>
 ```
 
     ##           [,1]
-    ## to_1 0.6557148
-    ## to_2 0.3899616
-    ## to_3 0.2227972
+    ## to_1 0.5808560
+    ## to_2 0.5442152
+    ## to_3 0.2637839
 
 ### Total forward pass
 
@@ -237,7 +237,8 @@ activate_layer <- function(input_activations, weights_and_biases) {
     sigmoid()
 }
 
-# Now we want to iteratively apply this function, carrying the activation forward, for example:
+# Now we want to iteratively apply this function, carrying the activation forward, 
+#   this can be done like this, however this doesn't scale with the network:
 c(1, 0.5) |>
   activate_layer(weights_and_biases$step_1) |>
   activate_layer(weights_and_biases$step_2) |>
@@ -245,15 +246,15 @@ c(1, 0.5) |>
 ```
 
     ##           [,1]
-    ## to_1 0.4558142
+    ## to_1 0.5558482
 
 ``` r
-# this can be made more simple using the reduce function:
+# This can be made more simple and scaling using the reduce function:
 reduce(weights_and_biases, activate_layer, .init = c(0.5, 1))
 ```
 
-    ##           [,1]
-    ## to_1 0.4550548
+    ##          [,1]
+    ## to_1 0.557654
 
 This concludes the example of the forward pass.
 
