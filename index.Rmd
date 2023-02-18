@@ -148,4 +148,30 @@ c(1, 0.5) |>
 
 ```
 
+### Total forward pass
+
+The total feed forward pass apply's the above three functions in a sequence. To make it easy a new function is build applying the above three steps.
+
+```{r activate_layer, message = FALSE, warning = FALSE}
+
+activate_layer <- function(input_activations, weights_and_biases) {
+  input_activations |>
+    weighted_activation(weights_and_biases$weights) |>
+    remove_bias(weights_and_biases$biases) |>
+    sigmoid()
+}
+
+# Now we want to iteratively apply this function, carrying the activation forward, for example:
+c(1, 0.5) |>
+  activate_layer(weights_and_biases$step_1) |>
+  activate_layer(weights_and_biases$step_2) |>
+  activate_layer(weights_and_biases$step_3)
+
+# this can be made more simple using the reduce function:
+reduce(weights_and_biases, activate_layer, .init = c(0.5, 1))
+
+```
+This concludes the example of the forward pass.
+
+
 # Back propagation
