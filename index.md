@@ -89,7 +89,14 @@ neurons_per_layer <- c(input_neurons, rep(layer_neurons, layers), output_neurons
 
 create_weights_and_biases <- function(neurons_from, neurons_to) {
   list(
-    weights = matrix(runif(neurons_from * neurons_to, -1, 1), nrow = neurons_from),
+    weights = matrix(
+      runif(neurons_from * neurons_to, -1, 1),
+      nrow = neurons_from,
+      dimnames = list(
+        paste0("from_", 1:neurons_from),
+        paste0("to_", 1:neurons_to)
+      )
+    ),
     biases = runif(neurons_to, -1, 1)
   )
 }
@@ -99,38 +106,41 @@ weights_and_biases <-
        neurons_per_layer[-1],
        create_weights_and_biases)
 
+names(weights_and_biases) <-
+  paste0("step_", 1:length(weights_and_biases))
+
 weights_and_biases
 ```
 
-    ## [[1]]
-    ## [[1]]$weights
-    ##            [,1]        [,2]       [,3]
-    ## [1,] -0.5447291 -0.05338535 -0.3846959
-    ## [2,] -0.8776336  0.77318856  0.4785767
+    ## $step_1
+    ## $step_1$weights
+    ##               to_1       to_2       to_3
+    ## from_1  0.01526446 -0.1457231 0.66190010
+    ## from_2 -0.08460486 -0.5003968 0.02126486
     ## 
-    ## [[1]]$biases
-    ## [1] 0.1557528 0.7701158 0.4271647
-    ## 
-    ## 
-    ## [[2]]
-    ## [[2]]$weights
-    ##            [,1]       [,2]       [,3]
-    ## [1,]  0.9059758  0.5886812 0.58645821
-    ## [2,] -0.3910393  0.6240854 0.07163238
-    ## [3,]  0.0614815 -0.4041383 0.42474352
-    ## 
-    ## [[2]]$biases
-    ## [1]  0.1348914  0.9244048 -0.9783119
+    ## $step_1$biases
+    ## [1]  0.9831834 -0.5801799  0.5784724
     ## 
     ## 
-    ## [[3]]
-    ## [[3]]$weights
-    ##            [,1]
-    ## [1,] -0.5119770
-    ## [2,] -0.9987706
-    ## [3,] -0.8815305
+    ## $step_2
+    ## $step_2$weights
+    ##              to_1       to_2       to_3
+    ## from_1 -0.1133457 -0.8707159  0.9119872
+    ## from_2  0.8050565 -0.2220603 -0.4712405
+    ## from_3 -0.3201872  0.7425106 -0.2090557
     ## 
-    ## [[3]]$biases
-    ## [1] 0.3786865
+    ## $step_2$biases
+    ## [1] -0.08921057  0.35723003 -0.33216029
+    ## 
+    ## 
+    ## $step_3
+    ## $step_3$weights
+    ##              to_1
+    ## from_1 -0.6074537
+    ## from_2 -0.4153567
+    ## from_3 -0.1390953
+    ## 
+    ## $step_3$biases
+    ## [1] -0.5970573
 
 # Forward propagation

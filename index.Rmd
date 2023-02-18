@@ -66,7 +66,14 @@ neurons_per_layer <- c(input_neurons, rep(layer_neurons, layers), output_neurons
 
 create_weights_and_biases <- function(neurons_from, neurons_to) {
   list(
-    weights = matrix(runif(neurons_from * neurons_to, -1, 1), nrow = neurons_from),
+    weights = matrix(
+      runif(neurons_from * neurons_to, -1, 1),
+      nrow = neurons_from,
+      dimnames = list(
+        paste0("from_", 1:neurons_from),
+        paste0("to_", 1:neurons_to)
+      )
+    ),
     biases = runif(neurons_to, -1, 1)
   )
 }
@@ -75,6 +82,9 @@ weights_and_biases <-
   map2(neurons_per_layer[-length(neurons_per_layer)],
        neurons_per_layer[-1],
        create_weights_and_biases)
+
+names(weights_and_biases) <-
+  paste0("step_", 1:length(weights_and_biases))
 
 weights_and_biases
 
