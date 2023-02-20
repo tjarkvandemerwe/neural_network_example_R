@@ -98,6 +98,7 @@ weights_and_biases
 # Forward pass
 
 To pass the signal through the network we need to iterate over the layers in the network, following the steps:
+
 * Calculate weigthed sum of inputs to each neuron
 * Minus bias of neuron
 * Activation function
