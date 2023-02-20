@@ -59,10 +59,13 @@ list(
 )
 ```
 
-First a matrix of all weights (w) from the input neurons to the first layer of hidden neurons is created. This is an input_neurons x layer_neurons matrix, where input_neurons is the amount of neurons in the input layer, and layer_neurons is the amount of neurons per hidden layer. And this is repeated until the last layer to the output neurons is innitialised.
+First a matrix of all weights (w) from the input neurons to the first layer of hidden neurons is created. This is an input_neurons x layer_neurons matrix, where input_neurons is the amount of neurons in the input layer, and layer_neurons is the amount of neurons per hidden layer. This way, the n-th, and the n+1-th layers connections are made.
+And this is repeated until the last layer to the output neurons is innitialised.
 
 ```{r nn_w_and_b, message = FALSE, warning = FALSE}
 neurons_per_layer <- c(input_neurons, rep(layer_neurons, layers), output_neurons)
+
+neurons_per_layer
 
 create_weights_and_biases <- function(neurons_from, neurons_to) {
   list(
@@ -95,9 +98,9 @@ weights_and_biases
 # Forward pass
 
 To pass the signal through the network we need to iterate over the layers in the network, following the steps:
-- Calculate weigthed sum of inputs to each neuron
-- Minus bias of neuron
-- Activation function
+* Calculate weigthed sum of inputs to each neuron
+* Minus bias of neuron
+* Activation function
 
 To do this three functions are build.
 
@@ -110,9 +113,11 @@ weighted_activation <- function(input_activation, weights) {
   weights %*% input_activation
 }
 
-# Example:
+# Example (using example input vector [1, 0.5]):
 weights_and_biases$step_1$weights
-weighted_activation(c(1, 0.5), weights_and_biases$step_1$weights)
+
+c(1, 0.5) |>
+  weighted_activation(weights_and_biases$step_1$weights)
 
 ```
 ### Reduce activation with bias
@@ -169,10 +174,25 @@ c(1, 0.5) |>
   activate_layer(weights_and_biases$step_3)
 
 # This can be made more simple and scaling using the reduce function:
-reduce(weights_and_biases, activate_layer, .init = c(0.5, 1))
+reduce(weights_and_biases, activate_layer, .init = c(1, 0.5))
 
 ```
 This concludes the example of the forward pass.
+
+### Shortform
+We can rewrite the big example in the following short code:
+
+```{r forward_short, message = FALSE, warning = FALSE}
+
+activate_layer_short <- function(a, wb) {
+  1 / (1 + exp(-((wb$weights %*% a) - wb$biases)))
+}
+
+reduce(weights_and_biases, activate_layer_short, .init = c(1, 0.5))
+
+```
+
+# Loss function
 
 
 # Back propagation

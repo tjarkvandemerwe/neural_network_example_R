@@ -1,6 +1,7 @@
 
 - <a href="#setup" id="toc-setup">Setup</a>
 - <a href="#forward-pass" id="toc-forward-pass">Forward pass</a>
+- <a href="#loss-function" id="toc-loss-function">Loss function</a>
 - <a href="#back-propagation" id="toc-back-propagation">Back
   propagation</a>
 
@@ -82,12 +83,19 @@ First a matrix of all weights (w) from the input neurons to the first
 layer of hidden neurons is created. This is an input_neurons x
 layer_neurons matrix, where input_neurons is the amount of neurons in
 the input layer, and layer_neurons is the amount of neurons per hidden
-layer. And this is repeated until the last layer to the output neurons
-is innitialised.
+layer. This way, the n-th, and the n+1-th layers connections are made.
+And this is repeated until the last layer to the output neurons is
+innitialised.
 
 ``` r
 neurons_per_layer <- c(input_neurons, rep(layer_neurons, layers), output_neurons)
 
+neurons_per_layer
+```
+
+    ## [1] 2 3 3 1
+
+``` r
 create_weights_and_biases <- function(neurons_from, neurons_to) {
   list(
     weights = matrix(
@@ -115,39 +123,39 @@ weights_and_biases
 
     ## $step_1
     ## $step_1$weights
-    ##          from_1     from_2
-    ## to_1 -0.9642369  0.5810507
-    ## to_2  0.2577594 -0.1608710
-    ## to_3 -0.2684745  0.4841622
+    ##           from_1     from_2
+    ## to_1  0.71915572 -0.9323626
+    ## to_2  0.07758507 -0.3702760
+    ## to_3 -0.18502164 -0.7602100
     ## 
     ## $step_1$biases
-    ## [1]  0.7987872  0.5436218 -0.7583378
+    ## [1]  0.22426633 -0.08053508  0.78304534
     ## 
     ## 
     ## $step_2
     ## $step_2$weights
-    ##           from_1    from_2     from_3
-    ## to_1 -0.09429003 0.1775677  0.3072712
-    ## to_2  0.76046556 0.6467591  0.2628238
-    ## to_3 -0.01934656 0.3837619 -0.9702936
+    ##          from_1     from_2     from_3
+    ## to_1  0.3302586 -0.2659880 -0.8283701
+    ## to_2 -0.4678081 -0.9337747  0.7700746
+    ## to_3 -0.6134124 -0.2071113  0.5825608
     ## 
     ## $step_2$biases
-    ## [1]  0.7330690 -0.9313348 -0.8553156
+    ## [1] -0.04536749  0.11306307  0.42311282
     ## 
     ## 
     ## $step_3
     ## $step_3$weights
-    ##          from_1   from_2     from_3
-    ## to_1 -0.8607697 0.037006 -0.2985853
+    ##          from_1     from_2    from_3
+    ## to_1 -0.8438708 -0.7633996 -0.205679
     ## 
     ## $step_3$biases
-    ## [1] -0.7003775
+    ## [1] 0.4890677
 
 # Forward pass
 
 To pass the signal through the network we need to iterate over the
-layers in the network, following the steps: - Calculate weigthed sum of
-inputs to each neuron - Minus bias of neuron - Activation function
+layers in the network, following the steps: \* Calculate weigthed sum of
+inputs to each neuron \* Minus bias of neuron \* Activation function
 
 To do this three functions are build.
 
@@ -161,23 +169,24 @@ weighted_activation <- function(input_activation, weights) {
   weights %*% input_activation
 }
 
-# Example:
+# Example (using example input vector [1, 0.5]):
 weights_and_biases$step_1$weights
 ```
 
-    ##          from_1     from_2
-    ## to_1 -0.9642369  0.5810507
-    ## to_2  0.2577594 -0.1608710
-    ## to_3 -0.2684745  0.4841622
+    ##           from_1     from_2
+    ## to_1  0.71915572 -0.9323626
+    ## to_2  0.07758507 -0.3702760
+    ## to_3 -0.18502164 -0.7602100
 
 ``` r
-weighted_activation(c(1, 0.5), weights_and_biases$step_1$weights)
+c(1, 0.5) |>
+  weighted_activation(weights_and_biases$step_1$weights)
 ```
 
-    ##             [,1]
-    ## to_1 -0.67371158
-    ## to_2  0.17732388
-    ## to_3 -0.02639337
+    ##            [,1]
+    ## to_1  0.2529744
+    ## to_2 -0.1075530
+    ## to_3 -0.5651266
 
 ### Reduce activation with bias
 
@@ -195,10 +204,10 @@ c(1, 0.5) |>
   remove_bias(c(-1, 0, 1))
 ```
 
-    ##            [,1]
-    ## to_1  0.3262884
-    ## to_2  0.1773239
-    ## to_3 -1.0263934
+    ##           [,1]
+    ## to_1  1.252974
+    ## to_2 -0.107553
+    ## to_3 -1.565127
 
 ### Apply activation function
 
@@ -219,9 +228,9 @@ c(1, 0.5) |>
 ```
 
     ##           [,1]
-    ## to_1 0.5808560
-    ## to_2 0.5442152
-    ## to_3 0.2637839
+    ## to_1 0.7778143
+    ## to_2 0.4731376
+    ## to_3 0.1729122
 
 ### Total forward pass
 
@@ -246,16 +255,33 @@ c(1, 0.5) |>
 ```
 
     ##           [,1]
-    ## to_1 0.5558482
+    ## to_1 0.2277267
 
 ``` r
 # This can be made more simple and scaling using the reduce function:
-reduce(weights_and_biases, activate_layer, .init = c(0.5, 1))
+reduce(weights_and_biases, activate_layer, .init = c(1, 0.5))
 ```
 
-    ##          [,1]
-    ## to_1 0.557654
+    ##           [,1]
+    ## to_1 0.2277267
 
 This concludes the example of the forward pass.
+
+### Shortform
+
+We can rewrite the big example in the following short code:
+
+``` r
+activate_layer_short <- function(a, wb) {
+  1 / (1 + exp(-((wb$weights %*% a) - wb$biases)))
+}
+
+reduce(weights_and_biases, activate_layer_short, .init = c(1, 0.5))
+```
+
+    ##           [,1]
+    ## to_1 0.2277267
+
+# Loss function
 
 # Back propagation
